@@ -1,158 +1,139 @@
-// Memory data storage
-const memories = [];
-let map = null;
-let selectedLocation = null;
-
+var memoryList = [];
+var leafletMap = null;
 // Dark mode functionality
-class DarkModeManager {
-    constructor() {
+var MemoryMapDarkModeManager = /** @class */ (function () {
+    function MemoryMapDarkModeManager() {
         this.init();
     }
-
-    init() {
-        // Check for saved dark mode preference or default to light mode
-        const savedMode = localStorage.getItem('darkMode');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
+    MemoryMapDarkModeManager.prototype.init = function () {
+        var _this = this;
+        var savedMode = localStorage.getItem('darkMode');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (savedMode === 'dark' || (!savedMode && prefersDark)) {
             this.enableDarkMode();
-        } else {
+        }
+        else {
             this.disableDarkMode();
         }
-
-        // Add event listener for the toggle button
-        const toggleBtn = document.getElementById('darkModeToggle');
+        var toggleBtn = document.getElementById('darkModeToggle');
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => this.toggleDarkMode());
+            toggleBtn.addEventListener('click', function () { return _this.toggleDarkMode(); });
         }
-    }
-
-    enableDarkMode() {
+    };
+    MemoryMapDarkModeManager.prototype.enableDarkMode = function () {
         document.documentElement.classList.add('dark');
         localStorage.setItem('darkMode', 'dark');
-    }
-
-    disableDarkMode() {
+    };
+    MemoryMapDarkModeManager.prototype.disableDarkMode = function () {
         document.documentElement.classList.remove('dark');
         localStorage.setItem('darkMode', 'light');
-    }
-
-    toggleDarkMode() {
+    };
+    MemoryMapDarkModeManager.prototype.toggleDarkMode = function () {
         if (document.documentElement.classList.contains('dark')) {
             this.disableDarkMode();
-        } else {
+        }
+        else {
             this.enableDarkMode();
         }
-    }
-}
-
+    };
+    return MemoryMapDarkModeManager;
+}());
 // Map functionality
-class MemoryMapApp {
-    constructor() {
+var MemoryMap = /** @class */ (function () {
+    function MemoryMap() {
+        this.selectedLocation = null;
         this.initializeEventListeners();
     }
-
-    initializeEventListeners() {
-        // Start mapping buttons
-        const startMappingBtn = document.getElementById('startMappingBtn');
+    MemoryMap.prototype.initializeEventListeners = function () {
+        var _this = this;
+        var startMappingBtn = document.getElementById('startMappingBtn');
         if (startMappingBtn) {
-            startMappingBtn.addEventListener('click', () => this.openMapModal());
+            startMappingBtn.addEventListener('click', function () { return _this.openMapModal(); });
         }
-
-        // Modal controls
-        const closeMapBtn = document.getElementById('closeMapBtn');
-        const mapModal = document.getElementById('mapModal');
-
-        closeMapBtn.addEventListener('click', () => this.closeMapModal());
-        mapModal.addEventListener('click', (e) => {
-            if (e.target === mapModal) this.closeMapModal();
-        });
-
-        // Form controls
-        const closeFormBtn = document.getElementById('closeFormBtn');
-        const cancelMemoryBtn = document.getElementById('cancelMemoryBtn');
-        const addMemoryForm = document.getElementById('addMemoryForm');
-
-        closeFormBtn.addEventListener('click', () => this.hideMemoryForm());
-        cancelMemoryBtn.addEventListener('click', () => this.hideMemoryForm());
-        addMemoryForm.addEventListener('submit', (e) => this.handleMemorySubmit(e));
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
+        var closeMapBtn = document.getElementById('closeMapBtn');
+        var mapModal = document.getElementById('mapModal');
+        if (closeMapBtn) {
+            closeMapBtn.addEventListener('click', function () { return _this.closeMapModal(); });
+        }
+        if (mapModal) {
+            mapModal.addEventListener('click', function (e) {
+                if (e.target === mapModal)
+                    _this.closeMapModal();
+            });
+        }
+        var closeFormBtn = document.getElementById('closeFormBtn');
+        var cancelMemoryBtn = document.getElementById('cancelMemoryBtn');
+        var addMemoryForm = document.getElementById('addMemoryForm');
+        if (closeFormBtn) {
+            closeFormBtn.addEventListener('click', function () { return _this.hideMemoryForm(); });
+        }
+        if (cancelMemoryBtn) {
+            cancelMemoryBtn.addEventListener('click', function () { return _this.hideMemoryForm(); });
+        }
+        if (addMemoryForm) {
+            addMemoryForm.addEventListener('submit', function (e) { return _this.handleMemorySubmit(e); });
+        }
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                this.closeMapModal();
-                this.hideMemoryForm();
+                _this.closeMapModal();
+                _this.hideMemoryForm();
             }
         });
-    }
-
-    openMapModal() {
-        const modal = document.getElementById('mapModal');
-        modal.classList.remove('hidden');
-
-        // Initialize map if not already done
-        if (!map) {
+    };
+    MemoryMap.prototype.openMapModal = function () {
+        var modal = document.getElementById('mapModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+        if (!leafletMap) {
             this.initializeMap();
         }
-
-        // Resize map after opening
-        setTimeout(() => {
-            if (map) map.invalidateSize();
+        setTimeout(function () {
+            if (leafletMap)
+                leafletMap.invalidateSize();
         }, 100);
-    }
-
-    closeMapModal() {
-        const modal = document.getElementById('mapModal');
-        modal.classList.add('hidden');
+    };
+    MemoryMap.prototype.closeMapModal = function () {
+        var modal = document.getElementById('mapModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
         this.hideMemoryForm();
-    }
-
-    initializeMap() {
-        // Initialize Leaflet map
-        map = L.map('realMap').setView([40.7128, -74.0060], 2);
-
-        // Add tile layer (OpenStreetMap)
+    };
+    MemoryMap.prototype.initializeMap = function () {
+        var _this = this;
+        leafletMap = L.map('realMap').setView([40.7128, -74.0060], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
-        }).addTo(map);
-
-        // Add some sample memories
+        }).addTo(leafletMap);
         this.addSampleMemories();
-
-        // Map click event to add new memories
-        map.on('click', (e) => {
-            this.handleMapClick(e);
+        leafletMap.on('click', function (e) {
+            _this.handleMapClick(e);
         });
-
-        // Try to get user's current location
         this.getCurrentLocation();
-    }
-
-    getCurrentLocation() {
+    };
+    MemoryMap.prototype.getCurrentLocation = function () {
         if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                map.setView([lat, lng], 10);
-
-                // Add a "You are here" marker
-                const currentLocationIcon = L.divIcon({
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                leafletMap.setView([lat, lng], 10);
+                var currentLocationIcon = L.divIcon({
                     className: 'current-location-marker',
                     html: '<div style="background: #3b82f6; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;"></div>',
                     iconSize: [16, 16],
                     iconAnchor: [8, 8]
                 });
-
                 L.marker([lat, lng], { icon: currentLocationIcon })
-                    .addTo(map)
+                    .addTo(leafletMap)
                     .bindPopup("📍 You are here!");
             });
         }
-    }
-
-    addSampleMemories() {
-        const sampleMemories = [
+    };
+    MemoryMap.prototype.addSampleMemories = function () {
+        var _this = this;
+        var sampleMemories = [
             {
                 lat: 48.8566,
                 lng: 2.3522,
@@ -186,182 +167,120 @@ class MemoryMapApp {
                 date: "2024-05-12"
             }
         ];
-
-        sampleMemories.forEach(memory => {
-            this.addMemoryToMap(memory);
-            memories.push(memory);
+        sampleMemories.forEach(function (memory) {
+            _this.addMemoryToMap(memory);
+            memoryList.push(memory);
         });
-    }
-
-    addMemoryToMap(memory) {
-        // Create custom marker icon
-        const customIcon = L.divIcon({
+    };
+    MemoryMap.prototype.addMemoryToMap = function (memory) {
+        var customIcon = L.divIcon({
             className: 'custom-memory-marker',
-            html: `<div style="
-                        background: #ef4444;
-                        width: 20px;
-                        height: 20px;
-                        border-radius: 50% 50% 50% 0;
-                        transform: rotate(-45deg);
-                        border: 2px solid white;
-                        cursor: pointer;
-                        position: relative;
-                    ">
-                        <div style="
-                            position: absolute;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%) rotate(45deg);
-                            width: 8px;
-                            height: 8px;
-                            background: white;
-                            border-radius: 50%;
-                        "></div>
-                    </div>`,
+            html: "<div style=\"\n                        background: #ef4444;\n                        width: 20px;\n                        height: 20px;\n                        border-radius: 50% 50% 50% 0;\n                        transform: rotate(-45deg);\n                        border: 2px solid white;\n                        cursor: pointer;\n                        position: relative;\n                    \">\n                        <div style=\"\n                            position: absolute;\n                            top: 50%;\n                            left: 50%;\n                            transform: translate(-50%, -50%) rotate(45deg);\n                            width: 8px;\n                            height: 8px;\n                            background: white;\n                            border-radius: 50%;\n                        \"></div>\n                    </div>",
             iconSize: [20, 20],
             iconAnchor: [10, 20]
         });
-
-        // Create popup content
-        const friendsText = memory.friends.length > 0
-            ? `<p style="font-size: 12px; color: #64748b; margin-top: 8px;"><i class="fas fa-users"></i> With: ${memory.friends.join(', ')}</p>`
+        var friendsText = memory.friends.length > 0
+            ? "<p style=\"font-size: 12px; color: #64748b; margin-top: 8px;\"><i class=\"fas fa-users\"></i> With: ".concat(memory.friends.join(', '), "</p>")
             : '';
-
-        const popupContent = `
-            <div style="min-width: 180px;">
-                <h3 style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #1e293b;">${memory.title}</h3>
-                <p style="color: #64748b; margin-bottom: 6px; font-size: 12px;">${memory.description}</p>
-                ${friendsText}
-                <p style="font-size: 11px; color: #94a3b8; margin-top: 6px;"><i class="fas fa-calendar"></i> ${memory.date}</p>
-            </div>
-        `;
-
-        // Add marker to map
-        const marker = L.marker([memory.lat, memory.lng], { icon: customIcon })
-            .addTo(map)
+        var popupContent = "\n            <div style=\"min-width: 180px;\">\n                <h3 style=\"font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #1e293b;\">".concat(memory.title, "</h3>\n                <p style=\"color: #64748b; margin-bottom: 6px; font-size: 12px;\">").concat(memory.description, "</p>\n                ").concat(friendsText, "\n                <p style=\"font-size: 11px; color: #94a3b8; margin-top: 6px;\"><i class=\"fas fa-calendar\"></i> ").concat(memory.date, "</p>\n            </div>\n        ");
+        var marker = L.marker([memory.lat, memory.lng], { icon: customIcon })
+            .addTo(leafletMap)
             .bindPopup(popupContent);
-
         return marker;
-    }
-
-    handleMapClick(e) {
-        selectedLocation = e.latlng;
+    };
+    MemoryMap.prototype.handleMapClick = function (e) {
+        this.selectedLocation = e.latlng;
         this.showMemoryForm();
-
-        // Add a temporary marker
         if (this.tempMarker) {
-            map.removeLayer(this.tempMarker);
+            leafletMap.removeLayer(this.tempMarker);
         }
-
-        const tempIcon = L.divIcon({
+        var tempIcon = L.divIcon({
             className: 'temp-marker',
-            html: `<div style="
-                        background: #10b981;
-                        width: 16px;
-                        height: 16px;
-                        border-radius: 50%;
-                        border: 2px solid white;
-                    "></div>`,
+            html: "<div style=\"\n                        background: #10b981;\n                        width: 16px;\n                        height: 16px;\n                        border-radius: 50%;\n                        border: 2px solid white;\n                    \"></div>",
             iconSize: [16, 16],
             iconAnchor: [8, 8]
         });
-
         this.tempMarker = L.marker([e.latlng.lat, e.latlng.lng], { icon: tempIcon })
-            .addTo(map);
-    }
-
-    showMemoryForm() {
-        const form = document.getElementById('memoryForm');
-        form.classList.remove('hidden');
-        form.classList.add('show-fixed');
-        
-        // Focus on the title input
-        setTimeout(() => {
-            const titleInput = document.getElementById('memoryTitle');
-            if (titleInput) {
-                titleInput.focus();
-            }
-        }, 100);
-    }
-
-    hideMemoryForm() {
-        const form = document.getElementById('memoryForm');
-        form.classList.add('hidden');
-        form.classList.remove('show-fixed');
-
-        // Remove temporary marker
+            .addTo(leafletMap);
+    };
+    MemoryMap.prototype.showMemoryForm = function () {
+        var form = document.getElementById('memoryForm');
+        if (form) {
+            form.classList.remove('hidden');
+            form.classList.add('show-fixed');
+            setTimeout(function () {
+                var titleInput = document.getElementById('memoryTitle');
+                if (titleInput) {
+                    titleInput.focus();
+                }
+            }, 100);
+        }
+    };
+    MemoryMap.prototype.hideMemoryForm = function () {
+        var form = document.getElementById('memoryForm');
+        if (form) {
+            form.classList.add('hidden');
+            form.classList.remove('show-fixed');
+        }
         if (this.tempMarker) {
-            map.removeLayer(this.tempMarker);
+            leafletMap.removeLayer(this.tempMarker);
             this.tempMarker = null;
         }
-
-        // Reset form
-        document.getElementById('addMemoryForm').reset();
-        selectedLocation = null;
-    }
-
-    handleMemorySubmit(e) {
+        var addMemoryForm = document.getElementById('addMemoryForm');
+        if (addMemoryForm) {
+            addMemoryForm.reset();
+        }
+        this.selectedLocation = null;
+    };
+    MemoryMap.prototype.handleMemorySubmit = function (e) {
         e.preventDefault();
-
-        if (!selectedLocation) return;
-
-        // Get form data
-        const title = document.getElementById('memoryTitle').value.trim();
-        const description = document.getElementById('memoryDescription').value.trim();
-        const friendsInput = document.getElementById('memoryFriends').value.trim();
-        const friends = friendsInput ? friendsInput.split(',').map(f => f.trim()) : [];
-
+        if (!this.selectedLocation)
+            return;
+        var titleInput = document.getElementById('memoryTitle');
+        var descriptionInput = document.getElementById('memoryDescription');
+        var friendsInput = document.getElementById('memoryFriends');
+        var title = (titleInput === null || titleInput === void 0 ? void 0 : titleInput.value.trim()) || '';
+        var description = (descriptionInput === null || descriptionInput === void 0 ? void 0 : descriptionInput.value.trim()) || '';
+        var friendsStr = (friendsInput === null || friendsInput === void 0 ? void 0 : friendsInput.value.trim()) || '';
+        var friends = friendsStr ? friendsStr.split(',').map(function (f) { return f.trim(); }) : [];
         if (!title) {
             alert('Please enter a title for your memory!');
             return;
         }
-
-        // Create memory object
-        const memory = {
-            lat: selectedLocation.lat,
-            lng: selectedLocation.lng,
+        var memory = {
+            lat: this.selectedLocation.lat,
+            lng: this.selectedLocation.lng,
             title: title,
             description: description,
             friends: friends,
             date: new Date().toISOString().split('T')[0]
         };
-
-        // Add to memories array
-        memories.push(memory);
-
-        // Remove temporary marker
+        memoryList.push(memory);
         if (this.tempMarker) {
-            map.removeLayer(this.tempMarker);
+            leafletMap.removeLayer(this.tempMarker);
             this.tempMarker = null;
         }
-
-        // Add permanent marker
         this.addMemoryToMap(memory);
-
-        // Hide form and show success message
         this.hideMemoryForm();
         this.showSuccessMessage(memory.title);
-
         console.log('Memory added:', memory);
-        console.log('All memories:', memories);
-    }
-
-    showSuccessMessage(title) {
-        // Simple alert for now - you can replace with a nicer notification
-        alert(`Memory "${title}" added successfully!`);
-    }
-}
-
+        console.log('All memories:', memoryList);
+    };
+    MemoryMap.prototype.showSuccessMessage = function (title) {
+        alert("Memory \"".concat(title, "\" added successfully!"));
+    };
+    return MemoryMap;
+}());
 // Interactive map pins (existing functionality)
-document.querySelectorAll('.map-pin').forEach(pin => {
+document.querySelectorAll('.map-pin').forEach(function (pin) {
     pin.addEventListener('click', function () {
-        const location = this.dataset.location;
-        console.log(`Clicked on ${location}`);
+        var _a;
+        var location = (_a = this.dataset) === null || _a === void 0 ? void 0 : _a.location;
+        console.log("Clicked on ".concat(location));
     });
 });
-
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
-    new DarkModeManager();
-    new MemoryMapApp();
+    new MemoryMapDarkModeManager();
+    new MemoryMap();
 });
