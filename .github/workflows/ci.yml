@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx tsc --project tsconfig.json
+      - run: npx tsc --project public/tsconfig.json # if you have a separate frontend config
+      - run: npm run lint # if you have a lint script
+      # - run: npm test   # if you have tests
