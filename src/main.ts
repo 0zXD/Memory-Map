@@ -361,8 +361,8 @@ class MemoryMap {
 
 // Interactive map pins (existing functionality)
 document.querySelectorAll('.map-pin').forEach(pin => {
-    pin.addEventListener('click', function () {
-        const location = (this as HTMLElement).dataset?.location;
+    pin.addEventListener('click', function (this: HTMLElement) {
+        const location = this.dataset?.location;
         console.log(`Clicked on ${location}`);
     });
 });
