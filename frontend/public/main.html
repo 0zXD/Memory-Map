@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Map - Your Visual Travel Journal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link rel="stylesheet" href="Styles/style.css">
+</head>
+
+
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-300">
+    <!-- Navigation -->
+    <nav
+        class="fixed top-0 w-full z-50 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 transition-colors duration-300">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-map-marked-alt text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Memory Map</h1>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition-colors">Explore</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition-colors">My
+                        Maps</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition-colors">Friends</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition-colors">Settings</a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle"
+                        class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                        <i class="fas fa-moon text-slate-600 dark:text-slate-300 text-sm dark:hidden"></i>
+                        <i class="fas fa-sun text-yellow-500 text-sm hidden dark:block"></i>
+                    </button>
+                    <button
+                        class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 font-medium transition-colors">
+                        Add Memory
+                    </button>
+                    <div class="w-8 h-8 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-20 pb-12 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-800 dark:text-slate-100 mb-4 transition-colors">
+                Your Adventures, Beautifully Mapped
+            </h2>
+            <p class="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto transition-colors">
+                Create visual journals of your travels. Share memories with friends,
+                discover new places, and build a personal collection of life's adventures.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button id="startMappingBtn"
+                    class="bg-emerald-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+                    Start Mapping
+                </button>
+                <button
+                    class="bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-6 py-3 rounded-lg font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    Learn More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Map Preview -->
+    <section class="py-8 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div
+                class="relative h-80 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                <div class="absolute inset-0 bg-slate-100 dark:bg-slate-700 transition-colors">
+                    <!-- Simple illustrated map background -->
+                    <svg class="w-full h-full" viewBox="0 0 400 300" fill="none">
+                        <!-- Landmasses -->
+                        <path
+                            d="M50 80 Q80 60 120 70 L180 90 Q200 100 220 85 L280 95 Q320 80 350 90 L380 110 L380 280 L20 280 L20 120 Q30 90 50 80 Z"
+                            fill="#e2e8f0" class="dark:fill-slate-600" />
+                        <path
+                            d="M100 150 Q130 140 160 155 L200 170 Q230 160 250 175 L290 185 Q310 175 330 180 L350 190 L350 280 L80 280 L80 180 Q90 160 100 150 Z"
+                            fill="#cbd5e1" class="dark:fill-slate-500" />
+                        <!-- Water -->
+                        <rect x="0" y="0" width="400" height="300" fill="#bfdbfe" opacity="0.3"
+                            class="dark:fill-slate-400" />
+                    </svg>
+                </div>
+
+                <!-- Sample Map Pins -->
+                <div class="map-pin" style="top: 25%; left: 30%;" data-location="Paris"></div>
+                <div class="map-pin" style="top: 40%; left: 70%;" data-location="Tokyo"></div>
+                <div class="map-pin" style="top: 60%; left: 20%;" data-location="New York"></div>
+                <div class="map-pin" style="top: 35%; left: 85%;" data-location="Bali"></div>
+
+                <div
+                    class="absolute bottom-4 left-4 bg-white dark:bg-slate-700 rounded-lg p-3 border border-slate-200 dark:border-slate-600 transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-amber-400 rounded-md"></div>
+                        <div>
+                            <h3 class="font-medium text-slate-800 dark:text-slate-100 text-sm transition-colors">Paris
+                                Adventure</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 transition-colors">5 photos • 2 friends
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 px-6 bg-white dark:bg-slate-800 transition-colors">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-3 transition-colors">Why Memory Map?
+                </h3>
+                <p class="text-lg text-slate-600 dark:text-slate-300 transition-colors">Every journey deserves to be
+                    remembered beautifully</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center p-6">
+                    <div
+                        class="w-12 h-12 bg-rose-100 dark:bg-rose-900 rounded-lg flex items-center justify-center mx-auto mb-4 transition-colors">
+                        <i class="fas fa-camera text-rose-600 dark:text-rose-400 text-lg transition-colors"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3 transition-colors">Visual
+                        Storytelling</h4>
+                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed transition-colors">
+                        Upload photos, add notes, and create rich visual stories of your adventures.
+                        Every memory becomes a beautiful piece of your journey.
+                    </p>
+                </div>
+
+                <div class="text-center p-6">
+                    <div
+                        class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4 transition-colors">
+                        <i class="fas fa-users text-blue-600 dark:text-blue-400 text-lg transition-colors"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3 transition-colors">
+                        Collaborative Memories</h4>
+                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed transition-colors">
+                        Invite friends to contribute their photos and stories. Build shared memories
+                        and see adventures from multiple perspectives.
+                    </p>
+                </div>
+
+                <div class="text-center p-6">
+                    <div
+                        class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900 rounded-lg flex items-center justify-center mx-auto mb-4 transition-colors">
+                        <i
+                            class="fas fa-map-marked-alt text-emerald-600 dark:text-emerald-400 text-lg transition-colors"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3 transition-colors">
+                        Interactive Maps</h4>
+                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed transition-colors">
+                        Visualize your travels on beautiful interactive maps. Discover patterns,
+                        relive moments, and plan your next adventure.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Memory Grid Section -->
+    <section class="py-16 px-6 bg-slate-50 dark:bg-slate-900 transition-colors">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-3 transition-colors">Recent Memories
+                </h3>
+                <p class="text-lg text-slate-600 dark:text-slate-300 transition-colors">Discover amazing adventures from
+                    our community</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                    <div class="h-32 bg-orange-200 dark:bg-orange-800 transition-colors"></div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="w-6 h-6 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors"></div>
+                            <div>
+                                <h5 class="font-medium text-slate-800 dark:text-slate-100 text-sm transition-colors">
+                                    Sarah Chen</h5>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 transition-colors">2 days ago</p>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-1 text-sm transition-colors">
+                            Santorini Sunset</h4>
+                        <p class="text-slate-600 dark:text-slate-300 text-xs mb-3 transition-colors">The most beautiful
+                            sunset I've ever witnessed...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-1">
+                                <div class="w-4 h-4 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors">
+                                </div>
+                                <div class="w-4 h-4 bg-slate-400 dark:bg-slate-500 rounded-full transition-colors">
+                                </div>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 transition-colors">+3</span>
+                            </div>
+                            <div
+                                class="flex items-center space-x-1 text-slate-500 dark:text-slate-400 transition-colors">
+                                <i class="fas fa-heart text-xs"></i>
+                                <span class="text-xs">24</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                    <div class="h-32 bg-green-200 dark:bg-green-800 transition-colors"></div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="w-6 h-6 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors"></div>
+                            <div>
+                                <h5 class="font-medium text-slate-800 dark:text-slate-100 text-sm transition-colors">
+                                    Alex Rivera</h5>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 transition-colors">1 week ago</p>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-1 text-sm transition-colors">
+                            Hiking in Patagonia</h4>
+                        <p class="text-slate-600 dark:text-slate-300 text-xs mb-3 transition-colors">Epic 5-day trek
+                            through pristine wilderness...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-1">
+                                <span class="text-xs text-slate-500 dark:text-slate-400 transition-colors">Solo
+                                    adventure</span>
+                            </div>
+                            <div
+                                class="flex items-center space-x-1 text-slate-500 dark:text-slate-400 transition-colors">
+                                <i class="fas fa-heart text-xs"></i>
+                                <span class="text-xs">18</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                    <div class="h-32 bg-purple-200 dark:bg-purple-800 transition-colors"></div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="w-6 h-6 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors"></div>
+                            <div>
+                                <h5 class="font-medium text-slate-800 dark:text-slate-100 text-sm transition-colors">
+                                    Maya Patel</h5>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 transition-colors">3 days ago</p>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-1 text-sm transition-colors">
+                            Tokyo Food Tour</h4>
+                        <p class="text-slate-600 dark:text-slate-300 text-xs mb-3 transition-colors">Incredible street
+                            food discoveries in Shibuya...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-1">
+                                <div class="w-4 h-4 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors">
+                                </div>
+                                <div class="w-4 h-4 bg-slate-400 dark:bg-slate-500 rounded-full transition-colors">
+                                </div>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 transition-colors">+2</span>
+                            </div>
+                            <div
+                                class="flex items-center space-x-1 text-slate-500 dark:text-slate-400 transition-colors">
+                                <i class="fas fa-heart text-xs"></i>
+                                <span class="text-xs">31</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                    <div class="h-32 bg-blue-200 dark:bg-blue-800 transition-colors"></div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="w-6 h-6 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors"></div>
+                            <div>
+                                <h5 class="font-medium text-slate-800 dark:text-slate-100 text-sm transition-colors">
+                                    James Wilson</h5>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 transition-colors">5 days ago</p>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-1 text-sm transition-colors">
+                            Northern Lights</h4>
+                        <p class="text-slate-600 dark:text-slate-300 text-xs mb-3 transition-colors">Finally caught the
+                            aurora in Iceland...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-1">
+                                <span class="text-xs text-slate-500 dark:text-slate-400 transition-colors">with
+                                    Emma</span>
+                            </div>
+                            <div
+                                class="flex items-center space-x-1 text-slate-500 dark:text-slate-400 transition-colors">
+                                <i class="fas fa-heart text-xs"></i>
+                                <span class="text-xs">42</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 px-6 bg-emerald-600 dark:bg-emerald-700 transition-colors">
+        <div class="max-w-3xl mx-auto text-center">
+            <h3 class="text-3xl font-bold text-white mb-4">Start Your Memory Map Today</h3>
+            <p class="text-lg text-emerald-100 dark:text-emerald-200 mb-8 max-w-2xl mx-auto transition-colors">
+                Join thousands of adventurers who are already creating beautiful visual journals of their travels.
+                Your next great story is waiting to be mapped.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                    class="bg-white text-emerald-600 px-6 py-3 rounded-lg font-semibold hover:bg-slate-50 transition-colors">
+                    Create Free Account
+                </button>
+                <button
+                    class="border border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-800 dark:hover:bg-emerald-600 transition-colors">
+                    Learn More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 dark:bg-slate-900 text-white py-12 px-6 transition-colors">
+        <div class="max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-map-marked-alt text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-lg font-semibold">Memory Map</h1>
+                    </div>
+                    <p class="text-slate-400 dark:text-slate-500 text-sm leading-relaxed transition-colors">
+                        Creating beautiful visual journals of your adventures,
+                        one memory at a time.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-base mb-3">Product</h4>
+                    <ul class="space-y-2 text-sm text-slate-400 dark:text-slate-500 transition-colors">
+                        <li><a href="#" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Mobile App</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-base mb-3">Company</h4>
+                    <ul class="space-y-2 text-sm text-slate-400 dark:text-slate-500 transition-colors">
+                        <li><a href="#" class="hover:text-white transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-base mb-3">Connect</h4>
+                    <div class="flex space-x-3">
+                        <a href="#"
+                            class="w-8 h-8 bg-slate-700 dark:bg-slate-800 rounded-lg flex items-center justify-center hover:bg-emerald-600 text-sm transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#"
+                            class="w-8 h-8 bg-slate-700 dark:bg-slate-800 rounded-lg flex items-center justify-center hover:bg-emerald-600 text-sm transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#"
+                            class="w-8 h-8 bg-slate-700 dark:bg-slate-800 rounded-lg flex items-center justify-center hover:bg-emerald-600 text-sm transition-colors">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="border-t border-slate-700 dark:border-slate-800 pt-6 text-center text-sm text-slate-400 dark:text-slate-500 transition-colors">
+                <p>&copy; 2024 Memory Map. All rights reserved. Made with ❤️ for adventurers worldwide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div
+            class="bg-white dark:bg-slate-800 rounded-xl w-full max-w-4xl h-5/6 max-h-screen mx-4 flex flex-col transition-colors">
+            <div class="bg-emerald-600 text-white p-4 rounded-t-xl flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-semibold">Create Your Memory Map</h2>
+                    <p class="text-emerald-100 text-sm">Click on the map to add a memory at any location</p>
+                </div>
+                <button id="closeMapBtn" class="text-white hover:text-emerald-200 text-xl transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="flex-1 relative">
+                <div id="realMap" class="w-full h-full"></div>
+
+                <!-- Memory Form -->
+                <div id="memoryForm"
+                    class="absolute top-4 right-4 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl w-80 max-w-[calc(100vw-2rem)] h-[80vh] flex flex-col hidden transition-all duration-300 transform translate-x-full opacity-0 shadow-2xl z-[1000] overflow-hidden">
+                    
+                    <!-- Fixed Header -->
+                    <div class="flex items-center justify-between p-5 pb-3 border-b border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 flex-shrink-0">
+                        <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 transition-colors flex items-center">
+                            <i class="fas fa-camera-retro mr-2 text-emerald-600"></i>
+                            Add Memory
+                        </h3>
+                        <button id="closeFormBtn"
+                            class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Scrollable Content Area -->
+                    <div class="flex-1 overflow-y-auto">
+                        <form id="addMemoryForm" class="p-5 space-y-4">
+                            <!-- User Information -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors flex items-center">
+                                    <i class="fas fa-user mr-2 text-emerald-600"></i>Your Name
+                                </label>
+                                <input type="text" id="memoryUsername" name="username" required
+                                    class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 transition-colors"
+                                    placeholder="Enter your name">
+                            </div>
+
+                            <!-- Memory Title -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-2 text-emerald-600"></i>Memory Title
+                                </label>
+                                <input type="text" id="memoryTitle" name="title" required
+                                    class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 transition-colors"
+                                    placeholder="Give this memory a title">
+                            </div>
+
+                            <!-- Memory Description -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors flex items-center">
+                                    <i class="fas fa-comment mr-2 text-emerald-600"></i>Description
+                                </label>
+                                <textarea id="memoryDescription" name="description" rows="3"
+                                    class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 transition-colors resize-none"
+                                    placeholder="Describe this memory..."></textarea>
+                            </div>
+
+                            <!-- Photo Upload -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors flex items-center">
+                                    <i class="fas fa-camera mr-2 text-emerald-600"></i>Photo *
+                                </label>
+                                <div class="relative">
+                                    <input type="file" id="memoryPhoto" name="photo" accept="image/*" required
+                                        class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 transition-colors file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">JPG, PNG or WebP (max 10MB)</p>
+                                
+                                <!-- Photo Preview -->
+                                <div id="photoPreview" class="hidden mt-3">
+                                    <div class="relative inline-block">
+                                        <img id="previewImage" src="" alt="Preview" 
+                                             class="w-full max-w-48 h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm">
+                                        <button type="button" id="removePreview" 
+                                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Preview of selected photo</p>
+                                </div>
+                            </div>
+
+                            <!-- Friends/Tags -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors flex items-center">
+                                    <i class="fas fa-users mr-2 text-emerald-600"></i>Friends/Tags
+                                </label>
+                                <input type="text" id="memoryFriends" name="friends"
+                                    class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 transition-colors"
+                                    placeholder="Sarah, Mike, adventure (comma separated)">
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Fixed Footer with Action Buttons -->
+                    <div class="flex space-x-3 p-5 pt-3 bg-white dark:bg-slate-700 border-t border-slate-200 dark:border-slate-600 flex-shrink-0">
+                        <button type="submit" form="addMemoryForm"
+                            class="flex-1 bg-emerald-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 text-sm transition-colors flex items-center justify-center">
+                            <i class="fas fa-plus mr-2"></i>Add Memory
+                        </button>
+                        <button type="button" id="cancelMemoryBtn"
+                            class="px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-600 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-sm transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Photo Cards Container -->
+                <!-- <div id="photoCardsContainer"
+                    class="absolute top-4 left-4 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl p-4 w-96 max-w-[calc(100vw-2rem)] hidden transition-all duration-300 transform -translate-x-full opacity-0 shadow-2xl z-[1000] max-h-[80vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-slate-700 pb-2 border-b border-slate-200 dark:border-slate-600">
+                        <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 transition-colors flex items-center">
+                            <i class="fas fa-images mr-2 text-emerald-600"></i>
+                            Memories at this location
+                        </h3>
+                        <button id="closeCardsBtn"
+                            class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="photoCardsList" class="space-y-4">
+                    </div>
+                </div> -->
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner"
+                    class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                    <div class="bg-white dark:bg-slate-800 rounded-lg p-4 flex items-center space-x-3">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600"></div>
+                        <span class="text-slate-800 dark:text-slate-100">Uploading memory...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="messageContainer" class="fixed top-20 right-4 z-[60] space-y-2"></div>
+
+</body>
+<script src="./../../dist/main.js"></script>
+</html>

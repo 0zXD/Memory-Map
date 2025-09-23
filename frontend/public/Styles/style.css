@@ -1,0 +1,515 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.map-pin {
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 2px solid white;
+    cursor: pointer;
+    position: absolute;
+}
+
+.map-pin::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.floating-animation {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.pulse-glow {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
+    }
+}
+
+.memory-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.memory-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.15);
+}
+
+.interactive-map {
+    background: linear-gradient(45deg, #e3f2fd 0%, #f3e5f5 50%, #fff3e0 100%);
+    border-radius: 30px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.map-pin {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ff6b6b, #ffa726);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.map-pin:hover {
+    transform: rotate(-45deg) scale(1.2);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+}
+
+.map-pin::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+}
+
+/* Photo Preview Styling */
+#photoPreview {
+    animation: fadeInScale 0.3s ease;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#previewImage {
+    transition: all 0.2s ease;
+}
+
+#previewImage:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#removePreview {
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#removePreview:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Photo Cards Styling */
+#photoCardsContainer {
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+#photoCardsContainer.hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+#photoCardsContainer:not(.hidden) {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+.photo-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.photo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.photo-card .photo-image {
+    transition: transform 0.3s ease;
+}
+
+.photo-card:hover .photo-image {
+    transform: scale(1.05);
+}
+
+.photo-card .tag-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(16, 185, 129, 0.1);
+    color: rgb(16, 185, 129);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin: 2px;
+}
+
+/* Dark mode photo cards */
+.dark .photo-card {
+    background: linear-gradient(145deg, #374151 0%, #4b5563 100%);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.dark .photo-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dark .photo-card .tag-chip {
+    background: rgba(16, 185, 129, 0.2);
+    color: rgb(52, 211, 153);
+}
+
+/* Photo Modal Styling */
+.photo-modal {
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.photo-modal-content {
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Memory Form Enhanced Styling */
+#memoryForm {
+    backdrop-filter: blur(15px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    min-height: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+#memoryForm.active {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+}
+
+/* Form header styling */
+#memoryForm > div:first-child {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+/* Scrollable content area */
+#memoryForm > div:nth-child(2) {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
+}
+
+#memoryForm > div:nth-child(2)::-webkit-scrollbar {
+    width: 6px;
+}
+
+#memoryForm > div:nth-child(2)::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#memoryForm > div:nth-child(2)::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 3px;
+}
+
+#memoryForm > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.5);
+}
+
+/* Form footer styling */
+#memoryForm > div:last-child {
+    border-top: 1px solid rgba(226, 232, 240, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+#memoryForm input:focus,
+#memoryForm textarea:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    border-color: rgb(16, 185, 129);
+}
+
+#memoryForm label i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Enhanced button hover effects */
+#memoryForm button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#closeFormBtn:hover {
+    background-color: rgba(248, 250, 252, 0.8);
+}
+
+.dark #closeFormBtn:hover {
+    background-color: rgba(71, 85, 105, 0.8);
+}
+
+/* Form field animations */
+#memoryForm input,
+#memoryForm textarea {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#memoryForm input:hover,
+#memoryForm textarea:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* File input styling */
+#memoryPhoto {
+    position: relative;
+}
+
+#memoryPhoto::file-selector-button {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 0.75rem;
+}
+
+#memoryPhoto::file-selector-button:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Form spacing improvements */
+#addMemoryForm > div {
+    margin-bottom: 1.25rem;
+}
+
+#addMemoryForm > div:last-child {
+    margin-bottom: 0;
+}
+
+/* Label improvements */
+#memoryForm label {
+    font-weight: 500;
+    color: rgb(51, 65, 85);
+    margin-bottom: 0.5rem;
+}
+
+.dark #memoryForm label {
+    color: rgb(203, 213, 225);
+}
+
+/* Placeholder styling */
+#memoryForm input::placeholder,
+#memoryForm textarea::placeholder {
+    color: rgb(148, 163, 184);
+    font-style: italic;
+}
+
+.dark #memoryForm input::placeholder,
+.dark #memoryForm textarea::placeholder {
+    color: rgb(100, 116, 139);
+}
+
+/* Custom scrollbar for photo cards container */
+#photoCardsContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#photoCardsContainer::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+#photoCardsContainer::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 3px;
+}
+
+#photoCardsContainer::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.5);
+}
+
+/* Custom Map Popup Styling */
+.leaflet-popup-content-wrapper {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    overflow: hidden;
+}
+
+.dark .leaflet-popup-content-wrapper {
+    background: linear-gradient(145deg, #374151 0%, #4b5563 100%) !important;
+    border: 1px solid rgba(75, 85, 99, 0.8) !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.leaflet-popup-tip {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .leaflet-popup-tip {
+    background: linear-gradient(145deg, #374151 0%, #4b5563 100%) !important;
+    border: 1px solid rgba(75, 85, 99, 0.8) !important;
+}
+
+.leaflet-popup-close-button {
+    color: #64748b !important;
+    font-size: 18px !important;
+    font-weight: 300 !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    top: 8px !important;
+    right: 8px !important;
+}
+
+.leaflet-popup-close-button:hover {
+    background: rgba(248, 250, 252, 0.8) !important;
+    color: #1e293b !important;
+    transform: scale(1.1) !important;
+}
+
+.dark .leaflet-popup-close-button {
+    color: #94a3b8 !important;
+}
+
+.dark .leaflet-popup-close-button:hover {
+    background: rgba(71, 85, 105, 0.8) !important;
+    color: #f1f5f9 !important;
+}
+
+/* Custom marker hover effects */
+.custom-memory-marker {
+    z-index: 1000;
+}
+
+.custom-memory-marker:hover {
+    z-index: 1001;
+}
+
+/* Popup animation */
+.leaflet-popup {
+    animation: popupSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes popupSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
