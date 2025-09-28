@@ -4,6 +4,8 @@ import fs from "fs";
 import { ObjectId } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import connectDB from "./config/db";
 import { Post, Photo, User } from "./models/types";
 dotenv.config();
@@ -23,18 +25,154 @@ app.use(cors({
 // Parse JSON bodies
 app.use(express.json());
 
-// Upload endpoint - stores photo and creates post
-app.post("/upload", upload.single("image"), async (req, res) => {
+// Middleware to verify JWT token
+const authenticateToken = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err: any, user: any) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// Register endpoint
+app.post("/auth/register", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "Username, email, and password are required" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+
+    const connection = await connectDB();
+    const db = connection.db;
+
+    if (!db) {
+      return res.status(500).json({ error: "Database connection failed" });
+    }
+
+    // Check if user already exists
+    const existingUser = await db.collection("users").findOne({
+      $or: [{ username: username.trim() }, { email: email.trim().toLowerCase() }]
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "Username or email already exists" });
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user
+    const userDoc: User = {
+      username: username.trim(),
+      email: email.trim().toLowerCase(),
+      password: hashedPassword,
+      createdAt: new Date()
+    };
+
+    const result = await db.collection("users").insertOne(userDoc);
+
+    // Generate JWT token (an auth token given by server to the client which is stored as a cookie)
+    const token = jwt.sign(
+      { userId: result.insertedId, username: userDoc.username },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '1d' }
+    );
+
+    res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        id: result.insertedId,
+        username: userDoc.username,
+        email: userDoc.email
+      },
+      token
+    });
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.status(500).json({ error: "Error creating user" });
+  }
+});
+
+// Login endpoint
+app.post("/auth/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password are required" });
+    }
+
+    const connection = await connectDB();
+    const db = connection.db;
+
+    if (!db) {
+      return res.status(500).json({ error: "Database connection failed" });
+    }
+
+    // Find user by username or email
+    const user = await db.collection("users").findOne({
+      $or: [{ username: username.trim() }, { email: username.trim().toLowerCase() }]
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Check password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '1d' }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      },
+      token
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Error during login" });
+  }
+});
+
+// Upload endpoint - stores photo and creates post (requires authentication)
+app.post("/upload", authenticateToken, upload.single("image"), async (req: any, res) => {
   try {
     const filePath = req.file?.path;
     if (!filePath) return res.status(400).json({ error: "No file uploaded" });
 
     // Extract metadata from request body
-    const { title, caption, tags, latitude, longitude, username } = req.body;
+    const { title, caption, tags, latitude, longitude } = req.body;
 
-    if (!title || !latitude || !longitude || !username) {
+    if (!title || !latitude || !longitude) {
       return res.status(400).json({ 
-        error: "Missing required fields: title, latitude, longitude, username" 
+        error: "Missing required fields: title, latitude, longitude" 
       });
     }
 
@@ -53,20 +191,12 @@ app.post("/upload", upload.single("image"), async (req, res) => {
       return res.status(500).json({ error: "Database connection failed" });
     }
 
-    // Check if user exists, if not create one
-    let user = await db.collection("users").findOne({ username: username.trim() });
-    if (!user) {
-      const userDoc: User = {
-        username: username.trim(),
-        createdAt: new Date()
-      };
-      const userResult = await db.collection("users").insertOne(userDoc);
-      user = { _id: userResult.insertedId, ...userDoc };
-    }
+    // Get user from token
+    const userId = new ObjectId(req.user.userId);
 
     // Create Photo document
     const photoDoc: Photo = {
-      ownerId: user._id as ObjectId,
+      ownerId: userId,
       filename: req.file?.originalname,
       mimeType: mimeType || "image/jpeg",
       base64: base64String,
@@ -82,7 +212,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
       photoId: photoResult.insertedId,
       caption: caption || "",
       tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
-      createdBy: user._id as ObjectId,
+      createdBy: userId,
       createdAt: new Date(),
       location: {
         type: "Point",
@@ -99,11 +229,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     res.status(200).json({
       message: "Memory uploaded successfully",
       postId: postResult.insertedId,
-      photoId: photoResult.insertedId,
-      user: {
-        id: user._id,
-        username: user.username
-      }
+      photoId: photoResult.insertedId
     });
   } catch (err) {
     console.error(err);
@@ -111,8 +237,8 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-// Get all posts with photos
-app.get("/posts", async (req, res) => {
+// Get personalized posts (user's own posts + posts where they're tagged)
+app.get("/posts", authenticateToken, async (req: any, res) => {
   try {
     const connection = await connectDB();
     const db = connection.db;
@@ -121,8 +247,21 @@ app.get("/posts", async (req, res) => {
       return res.status(500).json({ error: "Database connection failed" });
     }
 
-    // Get posts with their photos and user info using aggregation
+    const userId = new ObjectId(req.user.userId);
+    const username = req.user.username;
+
+    // Get posts where:
+    // 1. User is the creator
+    // 2. User is tagged in the post
     const posts = await db.collection("posts").aggregate([
+      {
+        $match: {
+          $or: [
+            { createdBy: userId }, // User's own posts
+            { tags: { $in: [username] } } // Posts where user is tagged
+          ]
+        }
+      },
       {
         $lookup: {
           from: "photos",
@@ -152,6 +291,7 @@ app.get("/posts", async (req, res) => {
 
     // Transform data for frontend
     const transformedPosts = posts.map(post => ({
+      _id: post._id,
       id: post._id,
       title: post.title,
       description: post.caption,
@@ -165,7 +305,8 @@ app.get("/posts", async (req, res) => {
         id: post.user._id,
         username: post.user.username
       },
-      createdAt: post.createdAt
+      createdAt: post.createdAt,
+      isOwnPost: post.createdBy.toString() === userId.toString()
     }));
 
     res.status(200).json(transformedPosts);
@@ -320,10 +461,11 @@ app.get("/posts/location/:lat/:lng", async (req, res) => {
   }
 });
 
-// Delete post by ID
-app.delete("/posts/:id", async (req, res) => {
+// Delete post by ID (only allow users to delete their own posts)
+app.delete("/posts/:id", authenticateToken, async (req: any, res) => {
   try {
     const postId = req.params.id;
+    const userId = new ObjectId(req.user.userId);
 
     // Validate ObjectId format
     if (!ObjectId.isValid(postId)) {
@@ -337,11 +479,16 @@ app.delete("/posts/:id", async (req, res) => {
       return res.status(500).json({ error: "Database connection failed" });
     }
 
-    // First, get the post to find the associated photo
+    // First, get the post to check ownership and find the associated photo
     const post = await db.collection("posts").findOne({ _id: new ObjectId(postId) });
     
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Check if the user owns this post
+    if (post.createdBy.toString() !== userId.toString()) {
+      return res.status(403).json({ error: "You can only delete your own memories" });
     }
 
     // Delete the associated photo

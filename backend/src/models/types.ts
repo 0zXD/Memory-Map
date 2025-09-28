@@ -3,6 +3,8 @@ import { ObjectId } from "mongodb";
 export interface User {
   _id?: ObjectId;
   username: string;
+  email: string;
+  password: string;
   createdAt: Date;
 }
 
@@ -16,7 +18,7 @@ export interface Post {
   createdAt: Date;
   location: {
     type: "Point";
-    coordinates: [number, number]; // [longitude, latitude]
+    coordinates: [number, number];
   };
 }
 

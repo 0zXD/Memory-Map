@@ -42,17 +42,34 @@
                         class="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition-colors">Settings</a>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- User Info -->
+                    <div id="userInfo" class="hidden items-center space-x-2 mr-3">
+                        <div class="text-right">
+                            <p id="userName" class="text-sm font-medium text-slate-800 dark:text-slate-100"></p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Logged in</p>
+                        </div>
+                        <div class="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white text-xs"></i>
+                        </div>
+                    </div>
+                    
                     <!-- Dark Mode Toggle -->
                     <button id="darkModeToggle"
                         class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
                         <i class="fas fa-moon text-slate-600 dark:text-slate-300 text-sm dark:hidden"></i>
                         <i class="fas fa-sun text-yellow-500 text-sm hidden dark:block"></i>
                     </button>
+                    
+                    <!-- Logout Button -->
+                    <button id="logoutBtn"
+                        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-medium transition-colors text-sm">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </button>
+                    
                     <button
                         class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 font-medium transition-colors">
                         Add Memory
                     </button>
-                    <div class="w-8 h-8 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors"></div>
                 </div>
             </div>
         </div>
@@ -437,16 +454,6 @@
                     <!-- Scrollable Content Area -->
                     <div class="flex-1 overflow-y-auto">
                         <form id="addMemoryForm" class="p-5 space-y-4">
-                            <!-- User Information -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors flex items-center">
-                                    <i class="fas fa-user mr-2 text-emerald-600"></i>Your Name
-                                </label>
-                                <input type="text" id="memoryUsername" name="username" required
-                                    class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 transition-colors"
-                                    placeholder="Enter your name">
-                            </div>
-
                             <!-- Memory Title -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors flex items-center">
@@ -517,6 +524,7 @@
                     </div>
                 </div>
 
+                <!-- I didn't feel the need of this block, below. But uncomment if u like it -->
                 <!-- Photo Cards Container -->
                 <!-- <div id="photoCardsContainer"
                     class="absolute top-4 left-4 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl p-4 w-96 max-w-[calc(100vw-2rem)] hidden transition-all duration-300 transform -translate-x-full opacity-0 shadow-2xl z-[1000] max-h-[80vh] overflow-y-auto">
