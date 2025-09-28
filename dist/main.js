@@ -2,9 +2,48 @@
 const memoryList = [];
 let leafletMap = null;
 
-
 // API Configuration
 const API_BASE_URL = 'http://localhost:8080';
+
+// Authentication Manager
+class AuthManager {
+    static getToken() {
+        return localStorage.getItem('authToken');
+    }
+
+    static getUserData() {
+        const userData = localStorage.getItem('userData');
+        return userData ? JSON.parse(userData) : null;
+    }
+
+    static isAuthenticated() {
+        return !!this.getToken();
+    }
+
+    static logout() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        window.location.href = 'auth.html';
+    }
+
+    static checkAuthAndRedirect() {
+        if (!this.isAuthenticated()) {
+            window.location.href = 'auth.html';
+            return false;
+        }
+        return true;
+    }
+
+    static getAuthHeaders() {
+        const token = this.getToken();
+        return token ? {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        } : {
+            'Content-Type': 'application/json'
+        };
+    }
+}
 
 // Dark mode functionality
 class MemoryMapDarkModeManager {
@@ -44,9 +83,16 @@ class MemoryMapDarkModeManager {
 // Map functionality
 class MemoryMap {
     constructor() {
+        // Check authentication first
+        if (!AuthManager.checkAuthAndRedirect()) {
+            return;
+        }
+
         this.selectedLocation = null;
         this.tempMarker = null;
+        this.currentUser = AuthManager.getUserData();
         this.initializeEventListeners();
+        this.displayWelcomeMessage();
     }
     
     initializeEventListeners() {
@@ -54,6 +100,13 @@ class MemoryMap {
         if (startMappingBtn) {
             startMappingBtn.addEventListener('click', () => this.openMapModal());
         }
+        
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => AuthManager.logout());
+        }
+        
         const closeMapBtn = document.getElementById('closeMapBtn');
         const mapModal = document.getElementById('mapModal');
         if (closeMapBtn) {
@@ -134,19 +187,71 @@ class MemoryMap {
         this.getCurrentLocation();
     }
 
+    displayWelcomeMessage() {
+        const userData = this.currentUser;
+        if (userData) {
+            // Update user info in navigation
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+            
+            if (userInfo && userName) {
+                userName.textContent = userData.username;
+                userInfo.classList.remove('hidden');
+                userInfo.classList.add('flex');
+            }
+            
+            this.showMessage(`Welcome back, ${userData.username}! 🎉`, 'success');
+        }
+    }
+
     async loadExistingMemories() {
         try {
-            const response = await fetch(`${API_BASE_URL}/posts`);
-            if (response.ok) {
-                const memories = await response.json();
-                // Print all fetched memory info to the console
-                console.log('Fetched memories from backend:', memories);
+            console.log('Loading personalized memories...');
+            
+            const response = await fetch(`${API_BASE_URL}/posts`, {
+                method: 'GET',
+                headers: AuthManager.getAuthHeaders()
+            });
+
+            if (response.status === 401) {
+                // Token expired or invalid
+                AuthManager.logout();
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const memories = await response.json();
+            console.log('Loaded memories:', memories);
+
+            if (Array.isArray(memories)) {
                 memories.forEach(memory => {
                     this.addMemoryToMap(memory);
                 });
+                
+                if (memories.length > 0) {
+                    const ownMemories = memories.filter(m => m.isOwnPost).length;
+                    const taggedMemories = memories.filter(m => !m.isOwnPost).length;
+                    
+                    let message = `Loaded ${memories.length} memories`;
+                    if (ownMemories > 0 && taggedMemories > 0) {
+                        message += ` (${ownMemories} yours, ${taggedMemories} tagged)`;
+                    } else if (ownMemories > 0) {
+                        message += ` (all yours)`;
+                    } else if (taggedMemories > 0) {
+                        message += ` (all tagged)`;
+                    }
+                    
+                    this.showMessage(message, 'info');
+                } else {
+                    this.showMessage('No memories found. Start creating your first memory!', 'info');
+                }
             }
         } catch (error) {
-            console.error('Error loading existing memories:', error);
+            console.error('Error loading memories:', error);
+            this.showMessage('Failed to load memories', 'error');
         }
     }
 
@@ -573,23 +678,16 @@ class MemoryMap {
         e.preventDefault();
         if (!this.selectedLocation) return;
 
-        const usernameInput = document.getElementById('memoryUsername');
         const titleInput = document.getElementById('memoryTitle');
         const descriptionInput = document.getElementById('memoryDescription');
         const friendsInput = document.getElementById('memoryFriends');
         const photoInput = document.getElementById('memoryPhoto');
 
-        const username = usernameInput?.value.trim() || '';
         const title = titleInput?.value.trim() || '';
         const description = descriptionInput?.value.trim() || '';
         const friendsStr = friendsInput?.value.trim() || '';
         const friends = friendsStr ? friendsStr.split(',').map(f => f.trim()) : [];
         const photoFile = photoInput?.files[0];
-
-        if (!username) {
-            this.showMessage('Please enter your name', 'error');
-            return;
-        }
 
         if (!title) {
             this.showMessage('Please enter a title for this memory', 'error');
@@ -614,7 +712,8 @@ class MemoryMap {
                 description,
                 friends,
                 date: new Date().toISOString().split('T')[0],
-                user: { username }
+                user: this.currentUser,
+                isOwnPost: true
             };
 
             if (this.tempMarker) {
@@ -638,16 +737,10 @@ class MemoryMap {
         formData.append('image', file);
         
         // Add memory metadata to the form data
-        const username = document.getElementById('memoryUsername')?.value.trim() || '';
         const title = document.getElementById('memoryTitle')?.value.trim() || '';
         const description = document.getElementById('memoryDescription')?.value.trim() || '';
         const friendsStr = document.getElementById('memoryFriends')?.value.trim() || '';
         
-        if (!username) {
-            throw new Error('Please enter your name');
-        }
-        
-        formData.append('username', username);
         formData.append('title', title);
         formData.append('caption', description);
         formData.append('tags', friendsStr); // Using tags field for friends
@@ -656,8 +749,16 @@ class MemoryMap {
 
         const response = await fetch(`${API_BASE_URL}/upload`, {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${AuthManager.getToken()}`
+            },
             body: formData,
         });
+
+        if (response.status === 401) {
+            AuthManager.logout();
+            return;
+        }
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -798,10 +899,13 @@ class MemoryMap {
             // Send delete request to backend
             const response = await fetch(`${API_BASE_URL}/posts/${memoryId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+                headers: AuthManager.getAuthHeaders()
             });
+
+            if (response.status === 401) {
+                AuthManager.logout();
+                return;
+            }
 
             if (!response.ok) {
                 const errorData = await response.json();
