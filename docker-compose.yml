@@ -5,22 +5,43 @@ services:
       context: ./backend
     ports:
       - "8080:8080"
+    env_file:
+      - ./backend/.env
     volumes:
       - ./backend:/app
     depends_on:
       - mongo
+    networks:
+     - app-network
 
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
 
   mongo:
-    image: mongo:5
-    container_name: mongo
+    image: mongo:6
+    container_name: mongo_db
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+
+volumes: 
+    mongo-data:
+
+networks:
+    app-network:
+       driver: bridge

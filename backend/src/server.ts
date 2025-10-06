@@ -290,7 +290,7 @@ app.get("/posts", authenticateToken, async (req: any, res) => {
     ]).toArray();
 
     // Transform data for frontend
-    const transformedPosts = posts.map(post => ({
+    const transformedPosts = posts.map((post:any )=> ({
       _id: post._id,
       id: post._id,
       title: post.title,
@@ -437,7 +437,7 @@ app.get("/posts/location/:lat/:lng", async (req, res) => {
     ]).toArray();
 
     // Transform data for frontend
-    const transformedPosts = posts.map(post => ({
+    const transformedPosts = posts.map((post: any )=> ({
       id: post._id,
       title: post.title,
       description: post.caption,
