@@ -1042,4 +1042,3 @@ document.addEventListener('DOMContentLoaded', function () {
     new MemoryMapDarkModeManager();
     memoryMap = new MemoryMap();
 });
-
